@@ -1,38 +1,109 @@
 #include <stdio.h>
 
-void printCombinations(int score) {
-    int TD_2pt, TD_XP, FG, Safety;
-    int total_score;
+// Function to calculate the average of an array of sales
+double calculateAverage(double sales[], int n) {
+    double sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum += sales[i];
+    }
+    return sum / n;
+}
 
-    for (TD_2pt = 0; TD_2pt * 8 <= score; TD_2pt++) {
-        for (TD_XP = 0; TD_XP * 7 <= score; TD_XP++) {
-            for (FG = 0; FG * 3 <= score; FG++) {
-                for (Safety = 0; Safety * 2 <= score; Safety++) {
-                    total_score = TD_2pt * 8 + TD_XP * 7 + FG * 3 + Safety * 2;
-                    if (total_score == score) {
-                        printf("%d TD + 2pt, %d TD + XP, %d TD, %d 3pt FG, %d Safety\n",
-                            TD_2pt, TD_XP, TD_XP, FG, Safety);
-                    }
-                }
+// Function to find the minimum and maximum sales
+void findMinMax(double sales[], int n, double *minSales, double *maxSales, int *minMonthIndex, int *maxMonthIndex) {
+    *minSales = sales[0];
+    *maxSales = sales[0];
+    *minMonthIndex = 0;
+    *maxMonthIndex = 0;
+    for (int i = 1; i < n; i++) {
+        if (sales[i] < *minSales) {
+            *minSales = sales[i];
+            *minMonthIndex = i;
+        }
+        if (sales[i] > *maxSales) {
+            *maxSales = sales[i];
+            *maxMonthIndex = i;
+        }
+    }
+}
+
+// Function to calculate the six-month moving average
+double calculateMovingAverage(double sales[], int startIndex) {
+    double sum = 0;
+    for (int i = startIndex; i < startIndex + 6; i++) {
+        sum += sales[i];
+    }
+    return sum / 6;
+}
+
+// Function to sort sales in descending order
+void sortSalesDescending(double sales[], int n) {
+    int i, j;
+    double temp;
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (sales[j] < sales[j + 1]) {
+                // Swap the elements if they are in the wrong order
+                temp = sales[j];
+                sales[j] = sales[j + 1];
+                sales[j + 1] = temp;
             }
         }
     }
 }
 
+// Function to get the month name based on the month index
+const char* getMonthName(int monthIndex) {
+    static const char* monthNames[] = {
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+    return monthNames[monthIndex];
+}
+
 int main() {
-    int score;
+    // Array to store monthly sales
+    double sales[12] = {
+        23458.01, 40112.00, 56011.85, 37820.88, 37904.67, 60200.22,
+        72400.31, 56210.89, 67230.84, 68233.12, 80950.34, 95225.22
+    };
 
-    while (1) {
-        printf("Enter a non-negative integer: ");
-        scanf("%d", &score);
+    // Calculate the minimum and maximum sales along with their month indices
+    double minSales, maxSales;
+    int minMonthIndex, maxMonthIndex;
+    findMinMax(sales, 12, &minSales, &maxSales, &minMonthIndex, &maxMonthIndex);
 
-        if (score <= 1) {
-            printf("Terminating the program. Enter a value less than or equal to 1 to quit.\n");
-            break;
-        }
+    // Calculate the average sales
+    double averageSales = calculateAverage(sales, 12);
 
-        printf("Possible combinations of scoring plays for %d:\n", score);
-        printCombinations(score);
+    // Print the sales report
+    printf("Monthly sales report for 2022:\n");
+    printf("Month Sales\n");
+    for (int i = 0; i < 12; i++) {
+        printf("%s $%.2lf\n", getMonthName(i), sales[i]);
+    }
+
+    // Print the sales summary
+    printf("Sales summary:\n");
+    printf("Minimum sales: $%.2lf (%s)\n", minSales, getMonthName(minMonthIndex));
+    printf("Maximum sales: $%.2lf (%s)\n", maxSales, getMonthName(maxMonthIndex));
+    printf("Average sales: $%.2lf\n", averageSales);
+
+    // Calculate and print six-month moving averages
+    printf("Six-Month Moving Average Report:\n");
+    for (int i = 0; i < 7; i++) {
+        double movingAverage = calculateMovingAverage(sales, i);
+        printf("%s - %s $%.2lf\n", getMonthName(i), getMonthName(i + 5), movingAverage);
+    }
+
+    // Sort sales in descending order
+    sortSalesDescending(sales, 12);
+
+    // Print the sorted sales report
+    printf("Sales Report (Highest to Lowest):\n");
+    printf("Month Sales\n");
+    for (int i = 0; i < 12; i++) {
+        printf("%s $%.2lf\n", getMonthName(11 - i), sales[i]);
     }
 
     return 0;
